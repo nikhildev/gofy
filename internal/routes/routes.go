@@ -17,4 +17,7 @@ func RegisterRoutes(e *echo.Echo) {
 	// Also, additional middleware can be applied to the group explicitly.
 	healthGroup := e.Group("/health")
 	handlers.HealthRoutes(healthGroup)
+
+	logGroup := e.Group("/log")
+	handlers.LogRoutes(logGroup)
 }
