@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
-	"github.com/nikhildev/gofy/internal/db/mongodb"
+	"github.com/nikhildev/gofy/internal/db"
 	"github.com/nikhildev/gofy/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,11 +16,11 @@ type LogRepository interface {
 }
 
 type logRepository struct {
-	store *mongodb.DbStore
+	store *db.Store
 	coll  *mongo.Collection
 }
 
-var store, _ = mongodb.NewDbStore(nil)
+var store, _ = db.NewStore(nil)
 var coll = store.Db.Collection("logs")
 
 func (l *logRepository) SaveLog(logMessage models.LogMessage) error {

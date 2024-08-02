@@ -1,4 +1,4 @@
-package mongodb
+package db
 
 import (
 	"context"
@@ -12,28 +12,28 @@ import (
 )
 
 // We create a struct store the database connection instance and the client instance
-type DbStore struct {
+type Store struct {
 	Db     *mongo.Database
 	client *mongo.Client
 }
 
-func GetCollection(store DbStore, collName string) *mongo.Collection {
+func GetCollection(store Store, collName string) *mongo.Collection {
 	return store.Db.Collection(collName)
 }
 
 // This needs to be called from a function that has a defer statement to close the connection
-func NewDbStore(opts *options.ClientOptions) (*DbStore, error) {
-	var dbStore *DbStore
+func NewStore(opts *options.ClientOptions) (*Store, error) {
+	var store *Store
 
 	//The dbName is hardcoded here. It should be passed as a parameter probably from env variables
 	dbName := "gofy"
 
-	// If the dbStore and client is not nil, we reuse the connection
-	//if &dbStore.Db != nil && &dbStore.client != nil {
-	//	return dbStore, nil
+	// If the store and client is not nil, we reuse the connection
+	//if &store.Db != nil && &store.client != nil {
+	//	return store, nil
 	//}
 
-	// If the dbStore and client is nil, we create a new connection
+	// If the store and client is nil, we create a new connection
 	client, db, err := connectToMongo(opts, dbName)
 
 	if err != nil {
@@ -41,9 +41,9 @@ func NewDbStore(opts *options.ClientOptions) (*DbStore, error) {
 	}
 
 	if db != nil && client != nil {
-		return &DbStore{client: client, Db: db}, nil
+		return &Store{client: client, Db: db}, nil
 	}
-	return dbStore, nil
+	return store, nil
 }
 
 func connectToMongo(opts *options.ClientOptions, dbName string) (*mongo.Client, *mongo.Database, error) {

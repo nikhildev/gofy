@@ -17,6 +17,7 @@ func LogRoutes(g *echo.Group) {
 func getLogHandler(c echo.Context) error {
 	id := c.Param("id")
 
+	// Param validation should be done in the handler
 	if id == "" {
 		return c.String(http.StatusBadRequest, "ID is required")
 	} else {
