@@ -4,16 +4,19 @@ go 1.22.5
 
 require (
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/spf13/cobra v1.8.1
 	go.mongodb.org/mongo-driver v1.16.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect

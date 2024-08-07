@@ -14,7 +14,7 @@ import (
 // We create a struct store the database connection instance and the client instance
 type Store struct {
 	Db     *mongo.Database
-	client *mongo.Client
+	Client *mongo.Client
 }
 
 func GetCollection(store Store, collName string) *mongo.Collection {
@@ -41,7 +41,7 @@ func NewStore(opts *options.ClientOptions) (*Store, error) {
 	}
 
 	if db != nil && client != nil {
-		return &Store{client: client, Db: db}, nil
+		return &Store{Client: client, Db: db}, nil
 	}
 	return store, nil
 }

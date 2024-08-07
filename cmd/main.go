@@ -1,25 +1,46 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
+	"fmt"
+	"github.com/nikhildev/gofy/cmd/api"
+	"github.com/nikhildev/gofy/cmd/startup"
 	"github.com/nikhildev/gofy/internal/db"
-	"github.com/nikhildev/gofy/internal/routes"
+	"github.com/spf13/cobra"
 )
 
-func main() {
+func newRootCommand(store *db.Store) *cobra.Command {
+	var rootCommand = &cobra.Command{
+		Use:   "gofy",
+		Short: "Go Fuck Yourself",
+		Long:  `Just my playground to try go`,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Starting Root command")
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Root command started")
 
-	// This is where we call the mongodb.NewStore() function to create a new instance of the Store struct. This function returns a pointer to the Store struct and an error. We are ignoring the error for now, but in a real-world application, you should handle it properly.
-	_, err := db.NewStore(nil)
+		},
+		PostRun: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Root command completed")
+		},
+	}
+	rootCommand.AddCommand(startup.NewStartupCommand(store))
+	rootCommand.AddCommand(api.NewApiServerCommand())
+	return rootCommand
+}
+
+func main() {
+	// We get a new store here so as to pass it down to all commands that will need it.
+	// This also ensures that all downstream commands and subprocesses will not have to recreate new clients
+	store, err := db.NewStore(nil)
 	if err != nil {
 		panic(err)
 	}
 
-	//This creates a simple http echo server and starts it
-	e := echo.New()
+	rootCommand := newRootCommand(store)
 
-	// For simplicity, we are registering all the routes in the main function
-	routes.RegisterRoutes(e)
+	if err := rootCommand.Execute(); err != nil {
+		fmt.Println("rootCommand encountered fatal exception %s", err)
+	}
 
-	// Start the server
-	e.Logger.Fatal(e.Start(":3000"))
 }
