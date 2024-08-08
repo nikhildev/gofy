@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/nikhildev/gofy/cmd/api"
 	"github.com/nikhildev/gofy/cmd/startup"
 	"github.com/nikhildev/gofy/internal/db"
@@ -11,7 +12,7 @@ import (
 func newRootCommand(store *db.Store) *cobra.Command {
 	var rootCommand = &cobra.Command{
 		Use:   "gofy",
-		Short: "Go Fuck Yourself",
+		Short: "Go Funk Yourself",
 		Long:  `Just my playground to try go`,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Starting Root command")

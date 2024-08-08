@@ -4,4 +4,4 @@ The intention of this repo is just as a skeleton from various sources that I've 
 
 ### Why the name gofy?
 
-Well, I couldn't think of anything else. gofy = go fuck yourself
+Well, I couldn't think of anything else. gofy = go funk yourself
