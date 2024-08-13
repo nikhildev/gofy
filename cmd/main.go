@@ -41,7 +41,7 @@ func main() {
 	rootCommand := newRootCommand(store)
 
 	if err := rootCommand.Execute(); err != nil {
-		fmt.Println("rootCommand encountered fatal exception %s", err)
+		fmt.Printf("rootCommand encountered fatal exception %s", err)
 	}
 
 }
