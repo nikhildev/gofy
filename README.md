@@ -8,7 +8,7 @@ Well, I couldn't think of anything else. gofy = go funk yourself
 
 ### What concepts does this cover
 
-1. [Initialising application with cobra](./cmd/main.go:22:12)
+1. [Initialising application with cobra](./cmd/main.go)
 2. [Cobra sub command, ex: api](./cmd/api/api.go)
 3. [Initialise DB, ex: MongoDB](./internal/db/db.go)
 4. Using channels
