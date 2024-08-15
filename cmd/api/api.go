@@ -3,13 +3,14 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/nikhildev/gofy/internal/routes"
-	"github.com/spf13/cobra"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/labstack/echo/v4"
+	"github.com/nikhildev/gofy/internal/routes"
+	"github.com/spf13/cobra"
 )
 
 func NewApiServerCommand() *cobra.Command {
@@ -60,7 +61,7 @@ func StartApiServer() *echo.Echo {
 
 		// Start the server
 		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			fmt.Println("failed to start http server: %s", err)
+			fmt.Printf("failed to start http server: %s", err)
 		}
 	}()
 

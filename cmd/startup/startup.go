@@ -17,14 +17,25 @@ import (
  * This is the startup command. This command is used to start the application.
  * This command is a subcommand of the root command.
  * The root command is the parent command and this command is the child command.
+ * In this context, we can use the startup command for the following
+ * - Creating a new store
+ * - Reading the application configuration
+ * - Starting the API server
+ * - Running any database migrations where needed
+ * - Gracefully shutting down the application when interrupted
  */
-func NewStartupCommand(store *db.Store) *cobra.Command {
+func NewStartupCommand() *cobra.Command {
 	startupCommand := &cobra.Command{
-		Use:   "startup",
-		Short: "Startup",
+		Use:   "start",
+		Short: "StartAPI",
 		Long:  `This command starts the application and introduces dependencies`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Starting the application ...")
+
+			store, err := db.NewStore(nil)
+			if err != nil {
+				panic(err)
+			}
 
 			// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
 			// Use a buffered channel to avoid missing signals as recommended for signal.Notify
