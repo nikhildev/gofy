@@ -29,7 +29,7 @@ func NewStartupCommand() *cobra.Command {
 		Use:   "start",
 		Short: "StartAPI",
 		Long:  `This command starts the application and introduces dependencies`,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			fmt.Println("Starting the application ...")
 
 			store, err := db.NewStore(nil)
@@ -54,6 +54,8 @@ func NewStartupCommand() *cobra.Command {
 			}(store.Client, nil)
 
 			api.StartApiServer()
+
+			return nil
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Preparing to start the application ...")
