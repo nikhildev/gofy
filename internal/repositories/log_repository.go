@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+
 	"github.com/nikhildev/gofy/internal/db"
 	"github.com/nikhildev/gofy/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,9 +21,6 @@ type logRepository struct {
 	coll  *mongo.Collection
 }
 
-var store, _ = db.NewStore(nil)
-var coll = store.Db.Collection("logs")
-
 func (l *logRepository) SaveLog(logMessage models.LogMessage) error {
 	_, err := l.coll.InsertOne(nil, logMessage)
 	if err != nil {
@@ -33,12 +31,14 @@ func (l *logRepository) SaveLog(logMessage models.LogMessage) error {
 }
 
 func NewLogRepository() LogRepository {
+	var store, _ = db.NewStore(nil)
+	var coll = store.Db.Collection("logs")
 	return &logRepository{store: store, coll: coll}
 }
 
-func (l *logRepository) GetLog(id string) (*models.LogMessage, error) {
+func (r *logRepository) GetLog(id string) (*models.LogMessage, error) {
 	logId, err := primitive.ObjectIDFromHex(id)
-	res := coll.FindOne(context.Background(), bson.M{"_id": logId})
+	res := r.coll.FindOne(context.Background(), bson.M{"_id": logId})
 
 	if res.Err() != nil {
 		return nil, res.Err()

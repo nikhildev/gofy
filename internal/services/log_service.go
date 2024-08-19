@@ -1,13 +1,14 @@
 package services
 
 import (
+	"time"
+
 	"github.com/nikhildev/gofy/internal/models"
 	"github.com/nikhildev/gofy/internal/repositories"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 )
 
-var repo = repositories.NewLogRepository()
+var logRepo = repositories.NewLogRepository
 
 func CreateLog(logMessage string) error {
 	newLogMessage := models.LogMessage{
@@ -16,7 +17,7 @@ func CreateLog(logMessage string) error {
 		CreatedAt: primitive.NewDateTimeFromTime(time.Now()),
 	}
 
-	err := repo.SaveLog(newLogMessage)
+	err := logRepo().SaveLog(newLogMessage)
 	if err != nil {
 		return err
 	}
@@ -25,7 +26,7 @@ func CreateLog(logMessage string) error {
 }
 
 func GetLog(id string) (*models.LogMessage, error) {
-	logMessage, err := repo.GetLog(id)
+	logMessage, err := logRepo().GetLog(id)
 	if err != nil {
 		return nil, err
 	}

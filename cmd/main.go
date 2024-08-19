@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/nikhildev/gofy/cmd/api"
+	"github.com/nikhildev/gofy/cmd/start"
 	"github.com/nikhildev/gofy/cmd/workers"
 	"github.com/spf13/cobra"
 )
@@ -28,12 +30,12 @@ func newRootCommand() *cobra.Command {
 	// The root command can have multiple subcommands. Each subcommand can have its own subcommands as well.
 	// This is how we can create a tree of commands.
 	// The root command is the root of the tree and all other commands are the nodes of the tree.
-	// rootCommand.AddCommand(start.NewStartupCommand())
+	rootCommand.AddCommand(start.Command)
 
 	// ex: 'gofy startup' is a subcommand of 'gofy' and 'gofy api' is another subcommand of 'gofy'
-	// rootCommand.AddCommand(api.NewApiServerCommand())
+	rootCommand.AddCommand(api.Command)
 
-	rootCommand.AddCommand(workers.NewWorkerCommand())
+	rootCommand.AddCommand(workers.Command)
 	return rootCommand
 }
 

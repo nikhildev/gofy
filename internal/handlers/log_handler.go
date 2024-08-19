@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/nikhildev/gofy/internal/models"
 	"github.com/nikhildev/gofy/internal/services"
-	"log"
-	"net/http"
 )
 
 func LogRoutes(g *echo.Group) {
@@ -20,10 +21,9 @@ func getLogHandler(c echo.Context) error {
 	// Param validation should be done in the handler
 	if id == "" {
 		return c.String(http.StatusBadRequest, "ID is required")
-	} else {
-		res, _ := services.GetLog(id)
-		return c.JSON(http.StatusOK, res)
 	}
+	res, _ := services.GetLog(id)
+	return c.JSON(http.StatusOK, res)
 }
 
 func saveLogHandler(c echo.Context) error {

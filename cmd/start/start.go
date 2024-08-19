@@ -24,48 +24,45 @@ import (
  * - Running any database migrations where needed
  * - Gracefully shutting down the application when interrupted
  */
-func NewStartupCommand() *cobra.Command {
-	startupCommand := &cobra.Command{
-		Use:   "start",
-		Short: "StartAPI",
-		Long:  `This command starts the application and introduces dependencies`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Println("Starting the application ...")
 
-			store, err := db.NewStore(nil)
-			if err != nil {
-				panic(err)
-			}
+var Command = &cobra.Command{
+	Use:   "start",
+	Short: "StartAPI",
+	Long:  `This command starts the application and introduces dependencies`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("Starting the application ...")
 
-			// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
-			// Use a buffered channel to avoid missing signals as recommended for signal.Notify
-			quit := make(chan os.Signal, 1)
+		store, err := db.NewStore(nil)
+		if err != nil {
+			panic(err)
+		}
 
-			// Handle interrupt signal from the terminal
-			signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+		// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
+		// Use a buffered channel to avoid missing signals as recommended for signal.Notify
+		quit := make(chan os.Signal, 1)
 
-			// This defer would catch the interrupts as well and disconnect the mongo client.
-			// Because defer functions are executed outside the context of the main function,
-			// they need to have the client and context passed to them as dependencies.
-			defer func(client *mongo.Client, ctx context.Context) {
-				<-quit
-				cleanup(client, ctx)
-				os.Exit(1)
-			}(store.Client, nil)
+		// Handle interrupt signal from the terminal
+		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
-			api.StartApiServer()
+		// This defer would catch the interrupts as well and disconnect the mongo client.
+		// Because defer functions are executed outside the context of the main function,
+		// they need to have the client and context passed to them as dependencies.
+		defer func(client *mongo.Client, ctx context.Context) {
+			<-quit
+			cleanup(client, ctx)
+			os.Exit(1)
+		}(store.Client, nil)
 
-			return nil
-		},
-		PreRun: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Preparing to start the application ...")
-		},
-		PostRun: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Application startup completed!")
-		},
-	}
+		api.StartApiServer()
 
-	return startupCommand
+		return nil
+	},
+	PreRun: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Preparing to start the application ...")
+	},
+	PostRun: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Application const NewStartCommande!")
+	},
 }
 
 func cleanup(client *mongo.Client, ctx context.Context) {

@@ -81,14 +81,12 @@ func RunWorkerPool() {
 	wp.Start(exampleTask)
 }
 
-func NewWorkerCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "workers",
-		Short: "Worker Pool",
-		Long:  `This command demonstrates how to use worker pools in Go`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			RunWorkerPool()
-			return nil
-		},
-	}
+var Command = &cobra.Command{
+	Use:   "workers",
+	Short: "Worker Pool",
+	Long:  `This command demonstrates how to use worker pools in Go`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		RunWorkerPool()
+		return nil
+	},
 }
