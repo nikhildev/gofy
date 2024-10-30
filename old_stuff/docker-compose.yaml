@@ -1,0 +1,11 @@
+name: gofy
+services:
+
+  # Uncomment the following lines to use the official MongoDB image
+  # gofy-mongo:
+  #   image: mongo:latest
+  #   container_name: gofy-mongo
+  #   ports:
+  #     - "27777:27017"
+  #   volumes:
+  #     - ./data:/data/db
