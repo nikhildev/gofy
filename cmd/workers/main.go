@@ -75,9 +75,9 @@ func (wp *WorkerPool) Start(task Task) {
 }
 
 // RunWorkerPool is a function that demonstrates how to use the WorkerPool.
-func RunWorkerPool() {
+func RunWorkerPool(poolSize int) {
 	// Create a new worker pool with 5 workers
-	wp := NewWorkerPool(10)
+	wp := NewWorkerPool(poolSize)
 
 	// Start the worker pool
 	log.Println("Starting worker pool ...")
@@ -85,5 +85,6 @@ func RunWorkerPool() {
 }
 
 func main() {
-	RunWorkerPool()
+	poolSize := 100
+	RunWorkerPool(poolSize)
 }
