@@ -15,6 +15,7 @@ type UserRepository interface {
 	GetAll() *[]models.User
 	GetById(id int) *models.User
 	Add(user models.User) (*models.User, error)
+	Update(user models.User) (*models.User, error)
 }
 
 type userRepository struct {
@@ -48,4 +49,14 @@ func (r *userRepository) Add(user models.User) (*models.User, error) {
 	}
 	*r.db = append(*r.db, user)
 	return &user, nil
+}
+
+func (r *userRepository) Update(user models.User) (*models.User, error) {
+	id := user.ID
+	existingUser := r.GetById(id)
+	if existingUser == nil {
+		return nil, errors.New("user not found")
+	}
+	existingUser.Name = user.Name
+	return existingUser, nil
 }

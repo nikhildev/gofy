@@ -21,6 +21,4 @@ func RegisterRoutes(e *echo.Echo) {
 	userGroup := e.Group("/users")
 	handlers.UserRoutes(userGroup)
 
-	// logGroup := e.Group("/log")
-	// handlers.LogRoutes(logGroup)
 }
