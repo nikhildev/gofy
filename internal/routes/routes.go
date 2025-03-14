@@ -18,6 +18,9 @@ func RegisterRoutes(e *echo.Echo) {
 	healthGroup := e.Group("/health")
 	handlers.HealthRoutes(healthGroup)
 
-	logGroup := e.Group("/log")
-	handlers.LogRoutes(logGroup)
+	userGroup := e.Group("/users")
+	handlers.UserRoutes(userGroup)
+
+	// logGroup := e.Group("/log")
+	// handlers.LogRoutes(logGroup)
 }
