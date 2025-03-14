@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/nikhildev/gofy/internal/models"
 	"github.com/nikhildev/gofy/internal/repositories"
 )
 
@@ -25,9 +27,25 @@ func getByIdHandler(c echo.Context) error {
 }
 
 func addHandler(c echo.Context) error {
-	userRepo.Add(repositories.User{
-		ID:   1,
-		Name: "John Doe",
-	})
-	return c.String(http.StatusOK, "ADDED")
+	payload := c.Request().Body
+
+	if payload == nil {
+		return c.String(http.StatusBadRequest, "Payload is required")
+	}
+
+	var user models.User
+	var err error
+	err = c.Bind(&user)
+	if err != nil {
+		log.Println(err)
+		return c.String(http.StatusBadRequest, "Invalid request")
+	}
+
+	_, err = userRepo.Add(user)
+	if err != nil {
+		log.Println(err)
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, user)
 }

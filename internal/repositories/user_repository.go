@@ -1,20 +1,20 @@
+// This is just a test user repository
 package repositories
 
-// This is just a test user repository
+import (
+	"errors"
 
-type User struct {
-	ID   int
-	Name string
-}
+	"github.com/nikhildev/gofy/internal/models"
+)
 
-type Db []User
+type Db []models.User
 
-var userDb = []User{}
+var userDb = []models.User{}
 
 type UserRepository interface {
-	GetAll() *[]User
-	GetById(id int) *User
-	Add(record User) *User
+	GetAll() *[]models.User
+	GetById(id int) *models.User
+	Add(user models.User) (*models.User, error)
 }
 
 type userRepository struct {
@@ -26,12 +26,12 @@ func NewUserRepository() UserRepository {
 	return &userRepository{db: &db}
 }
 
-func (r *userRepository) GetAll() *[]User {
-	users := []User(*r.db)
+func (r *userRepository) GetAll() *[]models.User {
+	users := []models.User(*r.db)
 	return &users
 }
 
-func (r *userRepository) GetById(id int) *User {
+func (r *userRepository) GetById(id int) *models.User {
 	for _, record := range *r.db {
 		if record.ID == id {
 			return &record
@@ -40,7 +40,12 @@ func (r *userRepository) GetById(id int) *User {
 	return nil
 }
 
-func (r *userRepository) Add(record User) *User {
-	*r.db = append(*r.db, record)
-	return &record
+func (r *userRepository) Add(user models.User) (*models.User, error) {
+	id := user.ID
+	existingUser := r.GetById(id)
+	if existingUser != nil {
+		return nil, errors.New("user already exists")
+	}
+	*r.db = append(*r.db, user)
+	return &user, nil
 }
