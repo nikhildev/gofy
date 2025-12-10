@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+
+# Air
+web/.air.toml
+web/tmp/
+
+# Documentation
+*.md
+web/README.md
+
+# Development files
+*.log
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+web/weather-app
+
+# Test files
+*_test.go
+**/*_test.go
+
+# Other directories not needed in the image
+api/
+assets/
+build/
+cmd/
+configs/
+internal/
+scripts/
+third_party/
+tools/
+test.db
+gofy.paw
+docker-compose.yaml
+
