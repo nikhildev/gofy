@@ -22,7 +22,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o weather-a
 FROM alpine:latest
 
 # Install ca-certificates for HTTPS requests to external APIs
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk update && \
+    apk --no-cache add ca-certificates tzdata && \
+    rm -rf /var/cache/apk/*
 
 # Create a non-root user
 RUN addgroup -g 1000 appuser && \
