@@ -16,24 +16,24 @@ func main() {
 func startApiServer() *echo.Echo {
 	log.Println("Starting API server")
 
-	//This creates a simple http echo server and starts it
-	server := echo.New()
+	e := echo.New()
 
-	// go func() {
 	log.Println("Registering routes")
-	routes.RegisterRoutes(server)
+	routes.RegisterRoutes(e)
 
-	s := &http.Server{
-		Addr:    ":3000",
-		Handler: server,
-	}
-	// For simplicity, we are registering all the routes in the main function
+	s := newHTTPServer(e)
 
-	// Start the server
 	if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		fmt.Printf("failed to start http server: %s", err)
 	}
 
-	return server
+	return e
+}
 
+// newHTTPServer constructs a net/http Server that uses the provided Echo instance as the handler.
+func newHTTPServer(e *echo.Echo) *http.Server {
+	return &http.Server{
+		Addr:    ":3000",
+		Handler: e,
+	}
 }

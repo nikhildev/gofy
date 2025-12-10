@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather - {{.Location}}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            animation: float 20s infinite ease-in-out;
+            z-index: 0;
+        }
+
+        body::before {
+            width: 400px;
+            height: 400px;
+            background: #ff6b9d;
+            top: -100px;
+            left: -100px;
+        }
+
+        body::after {
+            width: 500px;
+            height: 500px;
+            background: #4facfe;
+            bottom: -150px;
+            right: -150px;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -50px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.9); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .weather-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 1024px) {
+            .weather-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .weather-main-section {
+                display: contents;
+            }
+
+            .full-width {
+                grid-column: 1 / -1;
+            }
+        }
+
+        .search-box {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 24px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            overflow: hidden;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 14px 24px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .search-result-item .country-flag {
+            width: 24px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .weather-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .weather-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .location-name {
+            font-size: 2rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .country-flag {
+            width: 32px !important;
+            height: 24px !important;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: inline-block !important;
+            vertical-align: middle;
+            background-size: contain !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+        }
+
+        .current-temp {
+            font-size: 5rem;
+            font-weight: 300;
+            color: white;
+            line-height: 1;
+            margin: 20px 0;
+            word-break: break-word;
+        }
+
+        .current-condition {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 1.3rem;
+            color: white;
+            font-weight: 500;
+        }
+
+        .forecast-section {
+            margin-top: 24px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-container canvas {
+            flex: 1;
+            min-height: 280px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .daily-forecast {
+            display: grid;
+            gap: 12px;
+        }
+
+        .day-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            flex-wrap: wrap;
+        }
+
+        .day-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .day-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .day-date {
+            font-size: 1rem;
+            color: white;
+            font-weight: 500;
+            min-width: 120px;
+        }
+
+        .day-condition {
+            flex: 1;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            padding: 0 20px;
+        }
+
+        .day-temps {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            min-width: 150px;
+            justify-content: flex-end;
+        }
+
+        .temp-max {
+            font-size: 1.2rem;
+            color: #ffeb3b;
+            font-weight: 600;
+        }
+
+        .temp-min {
+            font-size: 1.2rem;
+            color: #81d4fa;
+            font-weight: 500;
+        }
+
+        .day-extra {
+            display: flex;
+            gap: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-left: 20px;
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.4);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .day-detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .day-detail-modal.active {
+            display: flex;
+        }
+
+        .day-detail-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(30px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .hourly-chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            border-radius: 16px;
+            margin-top: 20px;
+            min-height: 300px;
+        }
+
+        .hourly-chart-container canvas {
+            min-height: 250px;
+        }
+
+        /* Tablet styles */
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 900px;
+            }
+
+            .weather-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: auto;
+            }
+
+            .chart-container {
+                padding: 24px;
+            }
+
+            .weather-card {
+                height: auto;
+            }
+
+            .chart-container {
+                height: auto;
+            }
+
+            .weather-details {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+
+            .day-item {
+                padding: 16px;
+            }
+
+            .day-extra {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Mobile landscape and small tablets */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .weather-card {
+                padding: 30px 20px;
+            }
+
+            .chart-container {
+                padding: 20px 16px;
+            }
+            
+            .location-name {
+                font-size: 1.5rem;
+            }
+
+            .current-temp {
+                font-size: 3.5rem;
+            }
+
+            .current-condition {
+                font-size: 1.2rem;
+            }
+            
+            .weather-details {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .detail-item {
+                padding: 12px;
+            }
+
+            .detail-value {
+                font-size: 1.1rem;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            .day-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 16px;
+            }
+
+            .day-date {
+                min-width: auto;
+            }
+
+            .day-condition {
+                padding: 0;
+                font-size: 0.9rem;
+            }
+            
+            .day-temps {
+                justify-content: flex-start;
+                width: 100%;
+            }
+
+            .day-extra {
+                width: 100%;
+            }
+
+            .day-detail-content {
+                padding: 30px 20px;
+                margin: 10px;
+                max-height: 85vh;
+            }
+
+            .modal-title {
+                font-size: 1.5rem;
+                padding-right: 50px;
+            }
+
+            .close-modal {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+                top: 15px;
+                right: 15px;
+            }
+
+            .search-input {
+                font-size: 1rem;
+                padding: 16px 20px;
+            }
+        }
+
+        /* Mobile portrait */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .weather-card, .chart-container {
+                padding: 20px 16px;
+                border-radius: 20px;
+            }
+            
+            .location-name {
+                font-size: 1.3rem;
+            }
+
+            .current-temp {
+                font-size: 3rem;
+                margin: 15px 0;
+            }
+
+            .current-condition {
+                font-size: 1.1rem;
+                margin-bottom: 20px;
+            }
+
+            .weather-details {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .detail-item {
+                padding: 10px;
+                border-radius: 10px;
+            }
+
+            .detail-label {
+                font-size: 0.75rem;
+            }
+
+            .detail-value {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+                margin-bottom: 16px;
+            }
+
+            .chart-container {
+                padding: 16px 12px;
+            }
+
+            .chart-container canvas {
+                min-height: 220px;
+            }
+
+            .day-item {
+                padding: 14px;
+                gap: 8px;
+            }
+
+            .day-date {
+                font-size: 0.95rem;
+            }
+
+            .day-condition {
+                font-size: 0.85rem;
+            }
+
+            .temp-max, .temp-min {
+                font-size: 1.1rem;
+            }
+
+            .day-extra {
+                font-size: 0.85rem;
+            }
+
+            .search-input {
+                font-size: 0.95rem;
+                padding: 14px 18px;
+                border-radius: 14px;
+            }
+
+            .search-result-item {
+                padding: 12px 18px;
+                font-size: 0.9rem;
+            }
+
+            .day-detail-content {
+                padding: 24px 16px;
+                margin: 5px;
+                border-radius: 20px;
+            }
+
+            .modal-title {
+                font-size: 1.3rem;
+                margin-bottom: 20px;
+            }
+
+            .hourly-chart-container {
+                padding: 16px;
+            }
+
+            .hourly-chart-container h3 {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 360px) {
+            .current-temp {
+                font-size: 2.5rem;
+            }
+
+            .weather-details {
+                grid-template-columns: 1fr;
+            }
+
+            .day-temps {
+                gap: 12px;
+            }
+
+            .temp-max, .temp-min {
+                font-size: 1rem;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1400px;
+            }
+
+            .weather-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .chart-container {
+                padding: 35px;
+            }
+
+            canvas {
+                max-height: 450px;
+            }
+        }
+
+        @media (min-width: 1600px) {
+            .container {
+                max-width: 1600px;
+            }
+
+            .weather-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-box">
+            <input type="text" 
+                   class="search-input" 
+                   id="locationSearch" 
+                   placeholder="🔍 Search for a city..."
+                   autocomplete="off">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+
+        {{if .Error}}
+            <div class="error-message">⚠️ {{.Error}}</div>
+        {{end}}
+
+        {{if not .Error}}
+        <div class="weather-grid">
+            <!-- Main weather card -->
+            <div class="weather-card">
+                <div class="location-name">
+                    <span class="fi fi-{{.CountryCode | lower}} country-flag"></span>
+                    <span>{{.Location}}, {{.Country}}</span>
+                </div>
+                <div class="current-temp">{{printf "%.0f" .Current.Temperature}}°C</div>
+                <div class="current-condition">{{.Current.Condition}}</div>
+
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Today's High</div>
+                        <div class="detail-value">{{printf "%.0f" (index .Daily.TempMax 0)}}°C</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Today's Low</div>
+                        <div class="detail-value">{{printf "%.0f" (index .Daily.TempMin 0)}}°C</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Sunrise</div>
+                        <div class="detail-value">{{index .Daily.Sunrise 0 | formatTime}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Sunset</div>
+                        <div class="detail-value">{{index .Daily.Sunset 0 | formatTime}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Precipitation</div>
+                        <div class="detail-value">{{printf "%.1f" (index .Daily.Precipitation 0)}} mm</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 48 Hour forecast -->
+            <div class="chart-container">
+                <h2 class="section-title">Next 48 Hours</h2>
+                <canvas id="hourlyForecastChart"></canvas>
+            </div>
+
+            <!-- 10 Day forecast -->
+            <div class="chart-container">
+                <h2 class="section-title">10-Day Temperature Forecast</h2>
+                <canvas id="tempChart"></canvas>
+            </div>
+
+            <!-- Daily forecast -->
+            <div class="weather-card">
+                <h2 class="section-title">Daily Forecast</h2>
+            <div class="daily-forecast">
+                {{range $index, $date := .Daily.Time}}
+                {{if lt $index 10}}
+                <div class="day-item" data-day-index="{{$index}}" onclick="showDayDetail({{$index}}, '{{$date}}')">
+                    <div class="day-date">{{$date | formatDate}}</div>
+                    <div class="day-condition">{{index $.Daily.WeatherCode $index | getCondition}}</div>
+                    <div class="day-temps">
+                        <span class="temp-max">{{printf "%.0f" (index $.Daily.TempMax $index)}}°</span>
+                        <span class="temp-min">{{printf "%.0f" (index $.Daily.TempMin $index)}}°</span>
+                    </div>
+                    <div class="day-extra">
+                        <span>☔ {{printf "%.1f" (index $.Daily.Precipitation $index)}}mm</span>
+                    </div>
+                </div>
+                {{end}}
+                {{end}}
+            </div>
+            </div>
+        </div>
+
+        <!-- Day Detail Modal -->
+        <div class="day-detail-modal" id="dayDetailModal">
+            <div class="day-detail-content">
+                <button class="close-modal" onclick="closeDayDetail()">×</button>
+                <h2 class="modal-title" id="modalTitle">Day Details</h2>
+                <div class="weather-details" id="modalDetails"></div>
+                <div class="hourly-chart-container">
+                    <h3 style="color: white; margin-bottom: 16px;">24-Hour Forecast</h3>
+                    <canvas id="hourlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <script>
+        // Location search functionality
+        const searchInput = document.getElementById('locationSearch');
+        const searchResults = document.getElementById('searchResults');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                searchResults.classList.remove('active');
+                return;
+            }
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/search-location?q=${encodeURIComponent(query)}`);
+                    const locations = await response.json();
+                    
+                    if (locations && locations.length > 0) {
+                        searchResults.innerHTML = locations.map(loc => {
+                            const countryCode = (loc.country_code || loc.country || '').toLowerCase();
+                            return `<div class="search-result-item" data-name="${loc.name}">
+                                <span class="fi fi-${countryCode} country-flag"></span>
+                                <span>${loc.name}, ${loc.admin1 || ''} ${loc.country || ''}</span>
+                            </div>`;
+                        }).join('');
+                        searchResults.classList.add('active');
+                    } else {
+                        searchResults.classList.remove('active');
+                    }
+                } catch (error) {
+                    console.error('Search failed:', error);
+                }
+            }, 300);
+        });
+
+        searchResults.addEventListener('click', (e) => {
+            if (e.target.classList.contains('search-result-item')) {
+                const location = e.target.dataset.name;
+                window.location.href = `/weather?location=${encodeURIComponent(location)}`;
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.remove('active');
+            }
+        });
+
+        {{if not .Error}}
+        // Weather data
+        const dailyData = {
+            dates: [{{range $index, $date := .Daily.Time}}{{if lt $index 10}}'{{$date}}',{{end}}{{end}}],
+            formattedDates: [{{range $index, $date := .Daily.Time}}{{if lt $index 10}}'{{$date | formatDate}}',{{end}}{{end}}],
+            maxTemps: [{{range $index, $temp := .Daily.TempMax}}{{if lt $index 10}}{{$temp}},{{end}}{{end}}],
+            minTemps: [{{range $index, $temp := .Daily.TempMin}}{{if lt $index 10}}{{$temp}},{{end}}{{end}}],
+            precipitation: [{{range $index, $precip := .Daily.Precipitation}}{{if lt $index 10}}{{$precip}},{{end}}{{end}}],
+            sunrise: [{{range $index, $time := .Daily.Sunrise}}{{if lt $index 10}}'{{$time | formatTime}}',{{end}}{{end}}],
+            sunset: [{{range $index, $time := .Daily.Sunset}}{{if lt $index 10}}'{{$time | formatTime}}',{{end}}{{end}}],
+            conditions: [{{range $index, $code := .Daily.WeatherCode}}{{if lt $index 10}}'{{$code | getCondition}}',{{end}}{{end}}]
+        };
+
+        const hourlyData = {
+            times: [{{range .Hourly.Time}}'{{.}}',{{end}}],
+            temps: [{{range .Hourly.Temperature}}{{.}},{{end}}],
+            precipitation: [{{range .Hourly.Precipitation}}{{.}},{{end}}]
+        };
+
+        // Temperature chart
+        const ctx = document.getElementById('tempChart').getContext('2d');
+        const dates = dailyData.formattedDates;
+        const maxTemps = dailyData.maxTemps;
+        const minTemps = dailyData.minTemps;
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Max Temperature',
+                    data: maxTemps,
+                    borderColor: 'rgba(255, 193, 7, 1)',
+                    backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: 'rgba(255, 193, 7, 1)',
+                    pointBorderColor: 'white',
+                    pointBorderWidth: 2
+                }, {
+                    label: 'Min Temperature',
+                    data: minTemps,
+                    borderColor: 'rgba(129, 212, 250, 1)',
+                    backgroundColor: 'rgba(129, 212, 250, 0.2)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: 'rgba(129, 212, 250, 1)',
+                    pointBorderColor: 'white',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'center',
+                        labels: {
+                            color: 'white',
+                            font: {
+                                size: 11,
+                                weight: '500'
+                            },
+                            padding: 10,
+                            usePointStyle: true,
+                            boxWidth: 30,
+                            boxHeight: 10
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        padding: 12,
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '°C';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            font: {
+                                size: 12
+                            },
+                            callback: function(value) {
+                                return value + '°C';
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            font: {
+                                size: 12
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Hourly forecast chart (next 48 hours)
+        const hourlyCtx = document.getElementById('hourlyForecastChart').getContext('2d');
+        const next48Hours = hourlyData.times.slice(0, 48);
+        const next48Temps = hourlyData.temps.slice(0, 48);
+        const next48Precip = hourlyData.precipitation.slice(0, 48);
+        
+        const hourlyLabels = next48Hours.map(t => {
+            const date = new Date(t);
+            const hours = date.getHours();
+            const day = date.getDate();
+            const month = date.toLocaleDateString('en-US', { month: 'short' });
+            
+            // Show date at midnight or first hour
+            if (hours === 0) {
+                return `${month} ${day}, 00:00`;
+            }
+            return hours + ':00';
+        });
+
+        new Chart(hourlyCtx, {
+            type: 'line',
+            data: {
+                labels: hourlyLabels,
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: next48Temps,
+                    borderColor: 'rgba(255, 193, 7, 1)',
+                    backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    yAxisID: 'y',
+                    pointRadius: 2,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: 'rgba(255, 193, 7, 1)',
+                    pointBorderColor: 'white',
+                    pointBorderWidth: 2
+                }, {
+                    label: 'Precipitation (mm)',
+                    data: next48Precip,
+                    type: 'bar',
+                    backgroundColor: 'rgba(33, 150, 243, 0.6)',
+                    borderColor: 'rgba(33, 150, 243, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y1',
+                    barThickness: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'center',
+                        labels: {
+                            color: 'white',
+                            font: {
+                                size: 11,
+                                weight: '500'
+                            },
+                            padding: 10,
+                            usePointStyle: true,
+                            boxWidth: 30,
+                            boxHeight: 10
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        padding: 12,
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                if (context.dataset.label.includes('Temperature')) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '°C';
+                                } else {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + ' mm';
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            font: {
+                                size: 12
+                            },
+                            callback: function(value) {
+                                return value + '°C';
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Temperature',
+                            color: 'rgba(255, 193, 7, 1)',
+                            font: {
+                                size: 13,
+                                weight: '600'
+                            }
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        min: 0,
+                        ticks: {
+                            color: 'rgba(33, 150, 243, 0.8)',
+                            font: {
+                                size: 12
+                            },
+                            callback: function(value) {
+                                return value + ' mm';
+                            }
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                            drawBorder: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Precipitation',
+                            color: 'rgba(33, 150, 243, 1)',
+                            font: {
+                                size: 13,
+                                weight: '600'
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            font: {
+                                size: 10
+                            },
+                            maxRotation: 45,
+                            minRotation: 45,
+                            autoSkip: true,
+                            maxTicksLimit: 16
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Day detail modal functions
+        let hourlyChartInstance = null;
+
+        function showDayDetail(dayIndex, date) {
+            const modal = document.getElementById('dayDetailModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDetails = document.getElementById('modalDetails');
+
+            modalTitle.textContent = dailyData.formattedDates[dayIndex];
+
+            modalDetails.innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-label">Condition</div>
+                    <div class="detail-value">${dailyData.conditions[dayIndex]}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">High Temperature</div>
+                    <div class="detail-value">${dailyData.maxTemps[dayIndex].toFixed(1)}°C</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Low Temperature</div>
+                    <div class="detail-value">${dailyData.minTemps[dayIndex].toFixed(1)}°C</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Sunrise</div>
+                    <div class="detail-value">${dailyData.sunrise[dayIndex]}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Sunset</div>
+                    <div class="detail-value">${dailyData.sunset[dayIndex]}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Precipitation</div>
+                    <div class="detail-value">${dailyData.precipitation[dayIndex].toFixed(1)} mm</div>
+                </div>
+            `;
+
+            // Filter hourly data for this specific day
+            const dayStart = dayIndex * 24;
+            const dayEnd = dayStart + 24;
+            const hourlyTimes = hourlyData.times.slice(dayStart, dayEnd).map(t => {
+                const time = new Date(t);
+                return time.getHours() + ':00';
+            });
+            const hourlyTemps = hourlyData.temps.slice(dayStart, dayEnd);
+            const hourlyPrecip = hourlyData.precipitation.slice(dayStart, dayEnd);
+
+            // Destroy previous chart if exists
+            if (hourlyChartInstance) {
+                hourlyChartInstance.destroy();
+            }
+
+            // Create hourly chart
+            const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
+            hourlyChartInstance = new Chart(hourlyCtx, {
+                type: 'line',
+                data: {
+                    labels: hourlyTimes,
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: hourlyTemps,
+                        borderColor: 'rgba(255, 193, 7, 1)',
+                        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y',
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: 'rgba(255, 193, 7, 1)',
+                        pointBorderColor: 'white',
+                        pointBorderWidth: 2
+                    }, {
+                        label: 'Precipitation (mm)',
+                        data: hourlyPrecip,
+                        type: 'bar',
+                        backgroundColor: 'rgba(33, 150, 243, 0.6)',
+                        borderColor: 'rgba(33, 150, 243, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                color: 'white',
+                                font: { size: 11, weight: '500' },
+                                padding: 10,
+                                usePointStyle: true,
+                                boxWidth: 30,
+                                boxHeight: 10
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            padding: 12,
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                font: { size: 12 },
+                                callback: function(value) {
+                                    return value + '°C';
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)',
+                                drawBorder: false
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            ticks: {
+                                color: 'rgba(33, 150, 243, 0.8)',
+                                font: { size: 12 },
+                                callback: function(value) {
+                                    return value + ' mm';
+                                }
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                font: { size: 11 },
+                                maxRotation: 45,
+                                minRotation: 45
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)',
+                                drawBorder: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDayDetail() {
+            const modal = document.getElementById('dayDetailModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeDayDetail();
+            }
+        });
+
+        // Close modal on background click
+        document.getElementById('dayDetailModal').addEventListener('click', (e) => {
+            if (e.target.id === 'dayDetailModal') {
+                closeDayDetail();
+            }
+        });
+        {{end}}
+    </script>
+</body>
+</html>
+

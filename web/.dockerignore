@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Air
+.air.toml
+tmp/
+
+# Documentation
+README.md
+*.md
+
+# Development files
+*.log
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+weather-app
+
+# Test files
+*_test.go
+

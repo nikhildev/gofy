@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  weather-app:
+    image: gofy-weather:latest
+    container_name: gofy-weather
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/?location=Espoo"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    environment:
+      # Add any environment variables here if needed in the future
+      - TZ=Europe/Helsinki
+    labels:
+      - "com.gofy.app=weather"
+      - "com.gofy.description=Weather application with glassmorphism design"
+
