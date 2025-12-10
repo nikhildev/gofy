@@ -32,7 +32,7 @@ Add these two secrets:
 
 ### Secret 1: DOCKERHUB_USERNAME
 - Name: `DOCKERHUB_USERNAME`
-- Value: Your Docker Hub username (e.g., `johndoe`)
+- Value: `nikhildev`
 
 ### Secret 2: DOCKERHUB_TOKEN
 - Name: `DOCKERHUB_TOKEN`
@@ -59,9 +59,9 @@ git push origin main
 ```
 
 This will:
-- Build the Docker image for AMD64 and ARM64 platforms
-- Push to Docker Hub: `yourusername/gofy-weather:latest`
-- Push to GHCR: `ghcr.io/yourusername/gofy-weather:latest`
+- Build the Docker image for AMD64 platform
+- Push to Docker Hub: `nikhildev/gofy-weather:latest`
+- Push to GHCR: `ghcr.io/nikhildev/gofy-weather:latest`
 
 ### Manual Builds
 
@@ -89,10 +89,10 @@ git push origin v1.0.0
 ```
 
 This will create images with tags:
-- `yourusername/gofy-weather:v1.0.0`
-- `yourusername/gofy-weather:1.0`
-- `yourusername/gofy-weather:1`
-- `yourusername/gofy-weather:latest`
+- `nikhildev/gofy-weather:v1.0.0`
+- `nikhildev/gofy-weather:1.0`
+- `nikhildev/gofy-weather:1`
+- `nikhildev/gofy-weather:latest`
 
 ## 📦 Pulling Your Image
 
@@ -100,13 +100,13 @@ Once published, anyone can pull your image:
 
 ```bash
 # From Docker Hub
-docker pull yourusername/gofy-weather:latest
+docker pull nikhildev/gofy-weather:latest
 
 # From GitHub Container Registry
-docker pull ghcr.io/yourusername/gofy-weather:latest
+docker pull ghcr.io/nikhildev/gofy-weather:latest
 
 # Run the container
-docker run -d -p 8080:8080 yourusername/gofy-weather:latest
+docker run -d -p 8080:8080 nikhildev/gofy-weather:latest
 ```
 
 ## 🔍 Monitoring Builds
@@ -119,10 +119,10 @@ docker run -d -p 8080:8080 yourusername/gofy-weather:latest
 ### Check Published Images
 
 **Docker Hub:**
-- Visit: `https://hub.docker.com/r/yourusername/gofy-weather`
+- Visit: `https://hub.docker.com/r/nikhildev/gofy-weather`
 
 **GitHub Container Registry:**
-- Visit: `https://github.com/yourusername/gofy/pkgs/container/gofy-weather`
+- Visit: `https://github.com/nikhildev/gofy/pkgs/container/gofy-weather`
 
 ## 🎯 Workflow Features
 

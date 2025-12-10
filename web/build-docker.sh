@@ -101,6 +101,9 @@ show_run_instructions() {
     print_info "To run with custom port (e.g., 3000):"
     echo "  docker run -d -p 3000:8080 --name gofy-weather ${full_image_name}"
     echo ""
+    print_info "To run with docker-compose:"
+    echo "  docker-compose -f docker-compose.local.yml up -d"
+    echo ""
     print_info "To view logs:"
     echo "  docker logs -f gofy-weather"
     echo ""
@@ -112,6 +115,10 @@ show_run_instructions() {
     echo ""
     print_info "Access the weather application at: http://localhost:8080"
     print_info "Try different cities: http://localhost:8080/?location=London"
+    echo ""
+    print_info "To push to Docker Hub (nikhildev):"
+    echo "  docker tag ${full_image_name} nikhildev/gofy-weather:latest"
+    echo "  docker push nikhildev/gofy-weather:latest"
 }
 
 # Push to registry (optional)

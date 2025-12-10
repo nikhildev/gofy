@@ -1,14 +1,15 @@
 version: '3.8'
 
+# This compose file pulls the pre-built image from Docker Hub
+# Usage: docker-compose -f docker-compose.hub.yml up -d
+
 services:
   weather-app:
-    # Use pre-built image from Docker Hub
+    # Pull from Docker Hub
     image: nikhildev/gofy-weather:latest
     
-    # Or build locally (uncomment the build section below and comment out the image line above)
-    # build:
-    #   context: ..
-    #   dockerfile: web/Dockerfile
+    # Or use GitHub Container Registry
+    # image: ghcr.io/nikhildev/gofy-weather:latest
     
     container_name: gofy-weather
     ports:
@@ -21,7 +22,6 @@ services:
       retries: 3
       start_period: 5s
     environment:
-      # Add any environment variables here if needed in the future
       - TZ=Europe/Helsinki
     labels:
       - "com.gofy.app=weather"

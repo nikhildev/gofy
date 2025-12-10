@@ -88,16 +88,16 @@ The application will start on **http://localhost:8080**
 
 ### Pre-built Images (Coming Soon)
 
-Once set up, you can pull and run pre-built images:
+Once GitHub Actions is configured, you can pull and run pre-built images:
 
 ```bash
 # From Docker Hub
-docker pull yourusername/gofy-weather:latest
-docker run -d -p 8080:8080 yourusername/gofy-weather:latest
+docker pull nikhildev/gofy-weather:latest
+docker run -d -p 8080:8080 nikhildev/gofy-weather:latest
 
 # From GitHub Container Registry
-docker pull ghcr.io/yourusername/gofy-weather:latest
-docker run -d -p 8080:8080 ghcr.io/yourusername/gofy-weather:latest
+docker pull ghcr.io/nikhildev/gofy-weather:latest
+docker run -d -p 8080:8080 ghcr.io/nikhildev/gofy-weather:latest
 ```
 
 **Setup automated builds**: See [Docker Setup Guide](../../.github/DOCKER_SETUP.md) for configuring GitHub Actions to automatically build and push images.
@@ -207,11 +207,38 @@ docker rmi gofy-weather:latest
 
 ### Docker Compose (Recommended)
 
-A `docker-compose.yml` file is included for easy deployment. Run from the `web` directory:
+Three compose files are available:
+
+#### **1. Use Pre-built Image from Docker Hub** (Fastest)
 
 ```bash
 cd /Users/dev/code/ndc/gofy/web
-docker-compose up -d        # Build and start in background
+
+# Pull and run the pre-built image
+docker-compose -f docker-compose.hub.yml up -d
+
+# Or use the default compose file (already configured with nikhildev/gofy-weather)
+docker-compose up -d
+```
+
+#### **2. Build Locally from Source**
+
+```bash
+cd /Users/dev/code/ndc/gofy/web
+docker-compose -f docker-compose.local.yml up -d --build
+```
+
+#### **3. Default (Configurable)**
+
+The default `docker-compose.yml` is configured to pull from Docker Hub (`nikhildev/gofy-weather:latest`). 
+
+To build locally instead, edit `docker-compose.yml`:
+- Comment out: `image: nikhildev/gofy-weather:latest`
+- Uncomment the `build:` section
+
+```bash
+cd /Users/dev/code/ndc/gofy/web
+docker-compose up -d        # Start in background
 docker-compose logs -f      # View logs
 docker-compose down         # Stop and remove containers
 docker-compose restart      # Restart the service
@@ -239,17 +266,25 @@ gofy/
 ├── .dockerignore          # Docker build exclusions (parent directory)
 ├── go.mod                 # Go module definition
 ├── go.sum                 # Go dependencies
+├── .github/
+│   ├── workflows/
+│   │   ├── docker-build.yml        # Automated Docker builds
+│   │   └── docker-build-manual.yml # Manual trigger workflow
+│   ├── DOCKER_SETUP.md             # GitHub Actions setup guide
+│   └── README_BADGES.md            # Badge templates
 └── web/
-    ├── main.go                 # Application entry point and routing
-    ├── Dockerfile             # Docker image definition
-    ├── docker-compose.yml     # Docker Compose configuration
-    ├── build-docker.sh        # Docker build script
-    ├── .air.toml              # Air configuration for hot reload
+    ├── main.go                      # Application entry point and routing
+    ├── Dockerfile                   # Docker image definition
+    ├── docker-compose.yml           # Default compose (uses Docker Hub)
+    ├── docker-compose.hub.yml       # Compose for Docker Hub image
+    ├── docker-compose.local.yml     # Compose for local builds
+    ├── build-docker.sh              # Docker build script
+    ├── .air.toml                    # Air configuration for hot reload
     ├── handlers/
-    │   └── weather_handler.go # Weather page and API handlers
+    │   └── weather_handler.go       # Weather page and API handlers
     ├── templates/
-    │   └── weather.tmpl       # Weather application template
-    └── tmp/                   # Air build artifacts (auto-generated)
+    │   └── weather.tmpl             # Weather application template
+    └── tmp/                         # Air build artifacts (auto-generated)
 ```
 
 **Note**: The `.dockerignore` file is located in the project root directory (`gofy/`) because the Docker build context is the parent directory.
@@ -397,6 +432,19 @@ docker inspect --format='{{json .State.Health}}' gofy-weather | python3 -m json.
 3. **Handler Changes**: Go files trigger rebuild and restart
 4. **CSS Changes**: Template file changes reload the server
 5. **Browser DevTools**: Use browser console to debug JavaScript
+
+## 🌐 Published Images
+
+Once GitHub Actions completes its first run, the images will be available at:
+
+- **Docker Hub**: https://hub.docker.com/r/nikhildev/gofy-weather
+- **GitHub Container Registry**: https://github.com/nikhildev/gofy/pkgs/container/gofy-weather
+
+**Pull and run:**
+```bash
+docker pull nikhildev/gofy-weather:latest
+docker run -d -p 8080:8080 nikhildev/gofy-weather:latest
+```
 
 ## 🌍 Supported Locations
 

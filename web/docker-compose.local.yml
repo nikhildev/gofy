@@ -1,16 +1,16 @@
 version: '3.8'
 
+# This compose file builds the image locally from source
+# Usage: docker-compose -f docker-compose.local.yml up -d --build
+
 services:
   weather-app:
-    # Use pre-built image from Docker Hub
-    image: nikhildev/gofy-weather:latest
-    
-    # Or build locally (uncomment the build section below and comment out the image line above)
-    # build:
-    #   context: ..
-    #   dockerfile: web/Dockerfile
-    
-    container_name: gofy-weather
+    # Build locally from source
+    build:
+      context: ..
+      dockerfile: web/Dockerfile
+    image: gofy-weather:latest
+    container_name: gofy-weather-local
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -21,7 +21,6 @@ services:
       retries: 3
       start_period: 5s
     environment:
-      # Add any environment variables here if needed in the future
       - TZ=Europe/Helsinki
     labels:
       - "com.gofy.app=weather"
