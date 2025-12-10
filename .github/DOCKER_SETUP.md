@@ -106,7 +106,8 @@ docker pull nikhildev/gofy-weather:latest
 docker pull ghcr.io/nikhildev/gofy-weather:latest
 
 # Run the container
-docker run -d -p 8080:8080 nikhildev/gofy-weather:latest
+docker run -d -p 5050:8080 nikhildev/gofy-weather:latest
+# Or with docker-compose: docker-compose up -d
 ```
 
 ## 🔍 Monitoring Builds

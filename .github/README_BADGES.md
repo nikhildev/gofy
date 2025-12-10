@@ -41,10 +41,10 @@ A beautiful weather application built with Go...
 ## Quick Start
 
 ```bash
-docker run -p 8080:8080 nikhildev/gofy-weather:latest
+docker run -p 5050:8080 nikhildev/gofy-weather:latest
 ```
 
-Visit http://localhost:8080
+Visit http://localhost:5050
 ```
 
 ## All Available Badges

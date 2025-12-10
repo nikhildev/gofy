@@ -82,7 +82,9 @@ go build -o weather-app
 ./weather-app
 ```
 
-The application will start on **http://localhost:8080**
+The application will start on:
+- **Local development**: http://localhost:8080
+- **Docker Compose**: http://localhost:5050
 
 ## 🐳 Running with Docker
 
@@ -443,6 +445,11 @@ Once GitHub Actions completes its first run, the images will be available at:
 **Pull and run:**
 ```bash
 docker pull nikhildev/gofy-weather:latest
+
+# Run on port 5050 (docker-compose default)
+docker run -d -p 5050:8080 nikhildev/gofy-weather:latest
+
+# Or run on port 8080
 docker run -d -p 8080:8080 nikhildev/gofy-weather:latest
 ```
 
@@ -450,11 +457,11 @@ docker run -d -p 8080:8080 nikhildev/gofy-weather:latest
 
 The application supports weather data for **any location worldwide** using the Open-Meteo API's geocoding service. Simply search for any city, town, or location name.
 
-**Examples:**
-- Default: `http://localhost:8080/` (shows Espoo, Finland)
-- London: `http://localhost:8080/?location=London`
-- New York: `http://localhost:8080/?location=New York`
-- Tokyo: `http://localhost:8080/?location=Tokyo`
+**Examples (adjust port based on how you're running):**
+- Default: `http://localhost:5050/` or `http://localhost:8080/` (shows Espoo, Finland)
+- London: `http://localhost:5050/?location=London`
+- New York: `http://localhost:5050/?location=New York`
+- Tokyo: `http://localhost:5050/?location=Tokyo`
 
 ## 📦 Dependencies
 

@@ -12,7 +12,7 @@ services:
     image: gofy-weather:latest
     container_name: gofy-weather-local
     ports:
-      - "8080:8080"
+      - "5050:8080"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/?location=Espoo"]
