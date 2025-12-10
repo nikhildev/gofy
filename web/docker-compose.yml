@@ -5,8 +5,8 @@ services:
     image: gofy-weather:latest
     container_name: gofy-weather
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: web/Dockerfile
     ports:
       - "8080:8080"
     restart: unless-stopped

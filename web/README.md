@@ -86,7 +86,23 @@ The application will start on **http://localhost:8080**
 
 ## 🐳 Running with Docker
 
-### Quick Start with Docker
+### Pre-built Images (Coming Soon)
+
+Once set up, you can pull and run pre-built images:
+
+```bash
+# From Docker Hub
+docker pull yourusername/gofy-weather:latest
+docker run -d -p 8080:8080 yourusername/gofy-weather:latest
+
+# From GitHub Container Registry
+docker pull ghcr.io/yourusername/gofy-weather:latest
+docker run -d -p 8080:8080 ghcr.io/yourusername/gofy-weather:latest
+```
+
+**Setup automated builds**: See [Docker Setup Guide](../../.github/DOCKER_SETUP.md) for configuring GitHub Actions to automatically build and push images.
+
+### Quick Start with Docker (Local Build)
 
 The easiest way to run the application is using Docker:
 
@@ -130,12 +146,14 @@ Use the provided build script:
 
 ### Manual Docker Build
 
-If you prefer to build manually:
+If you prefer to build manually (build from parent directory):
 
 ```bash
-cd /Users/dev/code/ndc/gofy/web
-docker build -t gofy-weather:latest .
+cd /Users/dev/code/ndc/gofy
+docker build -f web/Dockerfile -t gofy-weather:latest .
 ```
+
+**Note**: The Docker build context must be the project root directory (not the `web` directory) because the Dockerfile needs access to `go.mod` and `go.sum` from the parent directory.
 
 ### Running the Container
 
@@ -189,14 +207,14 @@ docker rmi gofy-weather:latest
 
 ### Docker Compose (Recommended)
 
-A `docker-compose.yml` file is included for easy deployment:
-
-Run with Docker Compose:
+A `docker-compose.yml` file is included for easy deployment. Run from the `web` directory:
 
 ```bash
-docker-compose up -d
-docker-compose logs -f
-docker-compose down
+cd /Users/dev/code/ndc/gofy/web
+docker-compose up -d        # Build and start in background
+docker-compose logs -f      # View logs
+docker-compose down         # Stop and remove containers
+docker-compose restart      # Restart the service
 ```
 
 ## 🌐 Endpoints
@@ -217,19 +235,24 @@ docker-compose down
 ## 📁 Project Structure
 
 ```
-web/
-├── main.go                 # Application entry point and routing
-├── Dockerfile             # Docker image definition
-├── .dockerignore          # Docker build exclusions
-├── docker-compose.yml     # Docker Compose configuration
-├── build-docker.sh        # Docker build script
-├── .air.toml              # Air configuration for hot reload
-├── handlers/
-│   └── weather_handler.go # Weather page and API handlers
-├── templates/
-│   └── weather.tmpl       # Weather application template
-└── tmp/                   # Air build artifacts (auto-generated)
+gofy/
+├── .dockerignore          # Docker build exclusions (parent directory)
+├── go.mod                 # Go module definition
+├── go.sum                 # Go dependencies
+└── web/
+    ├── main.go                 # Application entry point and routing
+    ├── Dockerfile             # Docker image definition
+    ├── docker-compose.yml     # Docker Compose configuration
+    ├── build-docker.sh        # Docker build script
+    ├── .air.toml              # Air configuration for hot reload
+    ├── handlers/
+    │   └── weather_handler.go # Weather page and API handlers
+    ├── templates/
+    │   └── weather.tmpl       # Weather application template
+    └── tmp/                   # Air build artifacts (auto-generated)
 ```
+
+**Note**: The `.dockerignore` file is located in the project root directory (`gofy/`) because the Docker build context is the parent directory.
 
 ## 🎨 Technology Stack
 
@@ -401,13 +424,43 @@ Frontend libraries loaded via CDN:
 - flag-icons v7.2.3
 - Google Fonts (Inter, Dancing Script)
 
+## 🤖 CI/CD with GitHub Actions
+
+The project includes automated Docker builds using GitHub Actions:
+
+### Workflows
+
+1. **Automatic Builds** (`.github/workflows/docker-build.yml`)
+   - Triggers on push to main/master
+   - Builds for AMD64 and ARM64 platforms
+   - Pushes to Docker Hub and GitHub Container Registry
+   - Creates version tags from GitHub releases
+
+2. **Manual Builds** (`.github/workflows/docker-build-manual.yml`)
+   - Manually trigger from Actions tab
+   - Choose custom tags
+   - Select registries to push to
+
+### Setup Instructions
+
+See the complete guide: [Docker Setup Guide](../../.github/DOCKER_SETUP.md)
+
+**Quick Setup:**
+1. Create Docker Hub account and access token
+2. Add `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` to GitHub secrets
+3. Push to main branch or create a release
+4. Images automatically built and published!
+
 ## 🤝 Contributing
 
 To contribute to this project:
-1. Make your changes
-2. Test thoroughly on multiple devices
-3. Ensure Air hot reload works correctly
-4. Check responsive design on different screen sizes
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly on multiple devices
+5. Ensure Air hot reload works correctly
+6. Check responsive design on different screen sizes
+7. Create a pull request (Docker images will be built automatically for testing)
 
 ## 📄 License
 

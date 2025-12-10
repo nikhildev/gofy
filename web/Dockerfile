@@ -1,22 +1,22 @@
 # Multi-stage build for minimal image size
 # Stage 1: Build the Go application
-FROM golang:1.24-alpine AS builder
+FROM golang:alpine AS builder
 
 # Set working directory
-WORKDIR /app
+WORKDIR /build
 
-# Copy go mod files
-COPY ../go.mod ../go.sum ./
+# Copy go mod files (build context is parent directory)
+COPY go.mod go.sum ./
 
 # Download dependencies
 RUN go mod download
 
 # Copy the web application source
-COPY . ./web/
+COPY web/ ./web/
 
 # Build the application
-WORKDIR /app/web
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o weather-app .
+WORKDIR /build/web
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o weather-app .
 
 # Stage 2: Create the runtime image
 FROM alpine:latest
@@ -32,10 +32,10 @@ RUN addgroup -g 1000 appuser && \
 WORKDIR /app
 
 # Copy the binary from builder
-COPY --from=builder /app/web/weather-app .
+COPY --from=builder /build/web/weather-app .
 
 # Copy templates
-COPY --from=builder /app/web/templates ./templates/
+COPY --from=builder /build/web/templates ./templates/
 
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app

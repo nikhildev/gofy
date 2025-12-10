@@ -54,10 +54,14 @@ build_image() {
     print_info "Building Docker image: ${full_image_name}"
     print_info "This may take a few minutes..."
     
-    # Build from the web directory
-    cd "$(dirname "$0")"
+    # Get the script directory (web directory)
+    local script_dir="$(cd "$(dirname "$0")" && pwd)"
     
-    docker build -t "${full_image_name}" .
+    # Build from parent directory with web as context
+    cd "${script_dir}/.."
+    
+    print_info "Building from: $(pwd)"
+    docker build -f web/Dockerfile -t "${full_image_name}" .
     
     if [ $? -eq 0 ]; then
         print_success "Docker image built successfully: ${full_image_name}"
