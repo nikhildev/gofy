@@ -1,5 +1,11 @@
 # Gofy Weather Application
 
+[![Docker Build](https://github.com/nikhildev/gofy/actions/workflows/docker-build.yml/badge.svg)](https://github.com/nikhildev/gofy/actions/workflows/docker-build.yml)
+[![Docker Image Version](https://img.shields.io/docker/v/nikhildev/gofy-weather?sort=semver&logo=docker)](https://hub.docker.com/r/nikhildev/gofy-weather)
+[![Docker Pulls](https://img.shields.io/docker/pulls/nikhildev/gofy-weather?logo=docker)](https://hub.docker.com/r/nikhildev/gofy-weather)
+[![Docker Image Size](https://img.shields.io/docker/image-size/nikhildev/gofy-weather/latest?logo=docker)](https://hub.docker.com/r/nikhildev/gofy-weather)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/nikhildev/gofy)](https://golang.org/)
+
 A beautiful, modern weather application built with Go, featuring Apple-inspired glassmorphism design with real-time weather data and interactive charts. The application serves directly on the root path, providing instant access to weather information.
 
 ## 🌟 Features
