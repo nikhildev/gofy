@@ -9,80 +9,9 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/nikhildev/gofy/web/models"
 )
-
-type WeatherData struct {
-	Location    string
-	Country     string
-	CountryCode string
-	Latitude    float64
-	Longitude   float64
-	Current     CurrentWeather
-	Daily       DailyForecast
-	Hourly      HourlyForecast
-	Timezone    string
-	Error       string
-}
-
-type CurrentWeather struct {
-	Temperature float64
-	Condition   string
-	Time        string
-}
-
-type DailyForecast struct {
-	Time          []string
-	TempMax       []float64
-	TempMin       []float64
-	Sunrise       []string
-	Sunset        []string
-	Precipitation []float64
-	WeatherCode   []int
-}
-
-type HourlyForecast struct {
-	Time          []string
-	Temperature   []float64
-	Precipitation []float64
-	WeatherCode   []int
-}
-
-type GeocodingResult struct {
-	Results []struct {
-		Name        string  `json:"name"`
-		Latitude    float64 `json:"latitude"`
-		Longitude   float64 `json:"longitude"`
-		Country     string  `json:"country"`
-		CountryCode string  `json:"country_code"`
-		Admin1      string  `json:"admin1"`
-	} `json:"results"`
-}
-
-type OpenMeteoResponse struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-	Timezone  string  `json:"timezone"`
-	Current   struct {
-		Time        string  `json:"time"`
-		Temperature float64 `json:"temperature_2m"`
-		WeatherCode int     `json:"weather_code"`
-	} `json:"current"`
-	Daily struct {
-		Time          []string  `json:"time"`
-		TempMax       []float64 `json:"temperature_2m_max"`
-		TempMin       []float64 `json:"temperature_2m_min"`
-		Sunrise       []string  `json:"sunrise"`
-		Sunset        []string  `json:"sunset"`
-		Precipitation []float64 `json:"precipitation_sum"`
-		WeatherCode   []int     `json:"weather_code"`
-	} `json:"daily"`
-	Hourly struct {
-		Time          []string  `json:"time"`
-		Temperature   []float64 `json:"temperature_2m"`
-		Precipitation []float64 `json:"precipitation"`
-		WeatherCode   []int     `json:"weather_code"`
-	} `json:"hourly"`
-}
 
 var weatherTmpl *template.Template
 
@@ -174,7 +103,7 @@ func getCountryFlag(countryCode string) string {
 	return flag
 }
 
-func fetchWeatherData(lat, lon float64) (*OpenMeteoResponse, error) {
+func fetchWeatherData(lat, lon float64) (*models.OpenMeteoResponse, error) {
 	apiURL := fmt.Sprintf(
 		"https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,weather_code&hourly=temperature_2m,precipitation,weather_code&timezone=auto&forecast_days=10",
 		lat, lon,
@@ -192,7 +121,7 @@ func fetchWeatherData(lat, lon float64) (*OpenMeteoResponse, error) {
 		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)
 	}
 
-	var data OpenMeteoResponse
+	var data models.OpenMeteoResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		log.Printf("Error decoding weather data: %v", err)
 		return nil, err
@@ -219,7 +148,7 @@ func WeatherHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
-	var geocode GeocodingResult
+	var geocode models.GeocodingResult
 	if err := json.NewDecoder(resp.Body).Decode(&geocode); err != nil {
 		log.Printf("Error decoding geocoding response: %v", err)
 		renderWeatherError(w, "Failed to parse location data")
@@ -248,19 +177,19 @@ func WeatherHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Country: %s, CountryCode: %s", result.Country, countryCode)
 
-	data := WeatherData{
+	data := models.WeatherData{
 		Location:    result.Name,
 		Country:     result.Country,
 		CountryCode: countryCode,
 		Latitude:    result.Latitude,
 		Longitude:   result.Longitude,
 		Timezone:    weatherData.Timezone,
-		Current: CurrentWeather{
+		Current: models.CurrentWeather{
 			Temperature: weatherData.Current.Temperature,
 			Condition:   getWeatherCondition(weatherData.Current.WeatherCode),
 			Time:        weatherData.Current.Time,
 		},
-		Daily: DailyForecast{
+		Daily: models.DailyForecast{
 			Time:          weatherData.Daily.Time,
 			TempMax:       weatherData.Daily.TempMax,
 			TempMin:       weatherData.Daily.TempMin,
@@ -269,7 +198,7 @@ func WeatherHandler(w http.ResponseWriter, r *http.Request) {
 			Precipitation: weatherData.Daily.Precipitation,
 			WeatherCode:   weatherData.Daily.WeatherCode,
 		},
-		Hourly: HourlyForecast{
+		Hourly: models.HourlyForecast{
 			Time:          weatherData.Hourly.Time,
 			Temperature:   weatherData.Hourly.Temperature,
 			Precipitation: weatherData.Hourly.Precipitation,
@@ -285,7 +214,7 @@ func WeatherHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func renderWeatherError(w http.ResponseWriter, errorMsg string) {
-	data := WeatherData{
+	data := models.WeatherData{
 		Location: "Espoo",
 		Error:    errorMsg,
 	}
@@ -310,7 +239,7 @@ func SearchLocationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
-	var geocode GeocodingResult
+	var geocode models.GeocodingResult
 	if err := json.NewDecoder(resp.Body).Decode(&geocode); err != nil {
 		http.Error(w, "Failed to parse locations", http.StatusInternalServerError)
 		return
